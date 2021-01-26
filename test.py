@@ -8,21 +8,26 @@ def read_json(file):
         data = json.load(f)
     return data
 
+info = read_json(arg)
+print(info['url'])
+subprocess.run(["git", "clone",info['url']])
 
-
-test = read_json(arg)
-print(test['url'])
-subprocess.run(["git", "clone",test['url']])
-
-id = test['id']
-print(id)
-print(os.getcwd())
+id = info['id']
 path  = os.getcwd()+"/"+id+"/"
-print(path)
 
 cmd = 'convert '+path+'fichierTemp*.png Modele_animation_001a.gif'
 os.system(cmd)
-#subprocess.run(["python3", path2])
-test['etat'] = 'done'
-print(test)
 
+#Ajout du résultat pour l'envoyer au dépot distant
+subprocess.Popen(['git', 'add', '.'], cwd=path)
+
+#Commit du résultat à envoyer
+subprocess.Popen(['git', 'commit' ,'-m', 'Push du résultat après traitement'], cwd=path)
+
+#Push du projet, rentrée auto du username et du password
+child = pexpect.spawn('git push', cwd=nameRepo)
+child.expect([pexpect.TIMEOUT, "Username for 'https://github.com':"])
+child.sendline("Projet704\n".encode())
+child.expect([pexpect.TIMEOUT, "Password for 'https://Projet704@github.com':"])
+child.sendline("MaxenceThomas51\n".encode())
+child.read()
